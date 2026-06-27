@@ -1,11 +1,241 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>CoreTax Taxpayer Portal - Prototype</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .step-inactive { display: none; }
+        .bg-tax-blue { background-color: #1e3a8a; }
+        .text-tax-blue { color: #1e3a8a; }
+    </style>
 </head>
-<body>
-    <h1>Hello, World!</h1>
+<body class="bg-gray-50 font-sans">
+
+    <!-- Header / Navbar -->
+    <nav class="bg-tax-blue text-white p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-university text-2xl"></i>
+                <span class="font-bold text-xl tracking-tight">CORETAX PORTAL</span>
+            </div>
+            <div id="user-info" class="hidden flex items-center space-x-4">
+                <span class="text-sm"><i class="fas fa-user-circle"></i> Bpk. Budi Santoso (WP OP)</span>
+                <button onclick="logout()" class="bg-red-600 px-3 py-1 rounded text-sm hover:bg-red-700">Keluar</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto mt-8 p-4 max-w-5xl">
+
+        <!-- MODUL 1: REGISTRASI & ONBOARDING -->
+        <section id="modul-1" class="bg-white p-8 rounded-xl shadow-md">
+            <h2 class="text-2xl font-bold mb-6 text-tax-blue border-b pb-2">Pendaftaran Wajib Pajak Baru</h2>
+            
+            <div id="reg-step-1">
+                <p class="mb-4 text-gray-600">Silakan masukkan data identitas sesuai KTP Anda.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">NIK (16 Digit)</label>
+                        <input type="text" id="reg-nik" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-400" placeholder="3201xxxxxxxxxxxx">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Nama Sesuai KTP</label>
+                        <input type="text" id="reg-nama" class="w-full border p-2 rounded" placeholder="Nama Lengkap">
+                    </div>
+                </div>
+                <button onclick="validateDukcapil()" class="mt-6 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 w-full md:w-auto">
+                    Validasi Data <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+
+            <!-- Liveness Simulation -->
+            <div id="reg-step-2" class="step-inactive text-center">
+                <h3 class="font-bold mb-4">Verifikasi Liveness (Wajah)</h3>
+                <div class="w-64 h-64 bg-gray-200 mx-auto rounded-full flex items-center justify-center border-4 border-dashed border-blue-400 mb-4">
+                    <i class="fas fa-camera text-4xl text-gray-400"></i>
+                </div>
+                <p class="text-sm text-gray-500 mb-6">Posisikan wajah Anda pada lingkaran di atas.</p>
+                <button onclick="completeOnboarding()" class="bg-green-600 text-white px-8 py-2 rounded hover:bg-green-700">Verifikasi & Terbitkan NPWP</button>
+            </div>
+        </section>
+
+        <!-- MODUL 2: DASHBOARD & LEDGER -->
+        <section id="modul-2" class="step-inactive">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Profile Card -->
+                <div class="bg-white p-6 rounded-xl shadow shadow-blue-200 border-t-4 border-blue-600">
+                    <h3 class="font-bold text-gray-500 text-sm uppercase">Profil WP</h3>
+                    <p class="text-xl font-bold mt-2">Budi Santoso</p>
+                    <p class="text-sm text-gray-500">NPWP: 3201012345678000</p>
+                    <div class="mt-4 p-2 bg-blue-50 rounded">
+                        <span class="text-xs font-bold text-blue-800">Status PTKP: K/1 (Kawin 1 Anak)</span>
+                    </div>
+                </div>
+                <!-- Tax Ledger Summary -->
+                <div class="bg-white p-6 rounded-xl shadow shadow-red-200 border-t-4 border-red-500">
+                    <h3 class="font-bold text-gray-500 text-sm uppercase">Tagihan Aktif</h3>
+                    <p class="text-3xl font-bold mt-2 text-red-600">Rp 2.500.000</p>
+                    <button onclick="goToBilling()" class="mt-4 text-sm text-blue-600 font-bold hover:underline">Lihat Buku Besar →</button>
+                </div>
+                <!-- Quick Actions -->
+                <div class="bg-tax-blue p-6 rounded-xl shadow text-white">
+                    <h3 class="font-bold text-sm uppercase mb-4 text-blue-200">Layanan Cepat</h3>
+                    <button onclick="goToFiling()" class="w-full text-left p-2 hover:bg-blue-800 rounded mb-2 transition border border-blue-700">
+                        <i class="fas fa-file-invoice mr-2"></i> Lapor SPT (e-Filing)
+                    </button>
+                    <button onclick="goToBilling()" class="w-full text-left p-2 hover:bg-blue-800 rounded transition border border-blue-700">
+                        <i class="fas fa-wallet mr-2"></i> Bayar Pajak (e-Billing)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Ledger Table -->
+            <div class="bg-white mt-8 p-6 rounded-xl shadow-md">
+                <h3 class="font-bold mb-4">Riwayat Transaksi (Taxpayer Ledger)</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-gray-100 uppercase text-xs">
+                            <tr>
+                                <th class="p-3">Tanggal</th>
+                                <th class="p-3">Uraian</th>
+                                <th class="p-3">Debet (Tagihan)</th>
+                                <th class="p-3">Kredit (Bayar)</th>
+                                <th class="p-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b">
+                                <td class="p-3">15/05/2026</td>
+                                <td class="p-3">SPT Masa PPh 21</td>
+                                <td class="p-3 text-red-600">Rp 500.000</td>
+                                <td class="p-3">0</td>
+                                <td class="p-3"><span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">LUNAS</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODUL 3: e-FILING (PRE-POPULATED) -->
+        <section id="modul-3" class="step-inactive bg-white p-8 rounded-xl shadow-md">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-tax-blue">E-Filing Terintegrasi</h2>
+                <span class="bg-orange-100 text-orange-700 px-3 py-1 rounded text-sm font-bold">Tahun Pajak 2025</span>
+            </div>
+
+            <div id="filing-step-1">
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                    <p class="text-sm"><i class="fas fa-info-circle mr-2"></i> <strong>Data Pre-populated:</strong> Kami menemukan data bukti potong dari <strong>PT. Maju Mundur (Pemberi Kerja)</strong>.</p>
+                </div>
+                <div class="border rounded p-4 mb-4">
+                    <p class="font-bold">Bukti Potong 1721-A1</p>
+                    <p class="text-sm text-gray-600">Penghasilan Bruto: Rp 120.000.000</p>
+                    <p class="text-sm text-gray-600">Pajak yang Dipotong: Rp 2.500.000</p>
+                </div>
+                <button onclick="nextFiling()" class="bg-blue-600 text-white px-6 py-2 rounded">Gunakan Data Ini & Lanjutkan</button>
+            </div>
+
+            <div id="filing-step-2" class="step-inactive">
+                <h3 class="font-bold mb-4">Ringkasan Perhitungan Akumulatif</h3>
+                <div class="space-y-2 border-b pb-4">
+                    <div class="flex justify-between text-sm"><span>Total Pajak Terutang:</span> <span>Rp 2.500.000</span></div>
+                    <div class="flex justify-between text-sm"><span>Kredit Pajak (Dipotong Pihak Lain):</span> <span>-Rp 2.500.000</span></div>
+                </div>
+                <div class="flex justify-between font-bold text-xl mt-4 text-green-600">
+                    <span>Status SPT:</span>
+                    <span>NIHIL</span>
+                </div>
+                <button onclick="submitSPT()" class="mt-8 bg-green-600 text-white px-10 py-3 rounded-lg w-full font-bold">Kirim SPT (Minta Kode Verifikasi)</button>
+            </div>
+        </section>
+
+        <!-- MODUL 4: e-BILLING -->
+        <section id="modul-4" class="step-inactive bg-white p-8 rounded-xl shadow-md max-w-2xl mx-auto">
+            <h2 class="text-2xl font-bold mb-6 text-tax-blue text-center">Pembuatan Kode Billing</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold mb-1">Kode Akun Pajak (KAP)</label>
+                    <select class="w-full border p-2 rounded">
+                        <option>411121 - PPh Orang Pribadi</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">Kode Jenis Setoran (KJS)</label>
+                    <select class="w-full border p-2 rounded">
+                        <option>100 - Masa PPh Pasal 21</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">Jumlah Setor</label>
+                    <input type="number" class="w-full border p-2 rounded" placeholder="Rp 0">
+                </div>
+                <button onclick="generateBilling()" class="w-full bg-tax-blue text-white py-3 rounded font-bold hover:bg-blue-900 transition">TERBITKAN KODE BILLING</button>
+                
+                <div id="billing-result" class="hidden mt-6 p-6 border-2 border-dashed border-gray-300 bg-gray-50 text-center">
+                    <p class="text-sm text-gray-500 uppercase">ID Billing Anda</p>
+                    <p class="text-4xl font-mono font-bold text-blue-700 my-2">82025 00192 11234</p>
+                    <p class="text-xs text-red-500 font-bold italic">Masa berlaku: 30 Hari (s.d 27 Juli 2026)</p>
+                    <div class="mt-4 flex justify-center">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=820250019211234" alt="QR Code Billing">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // NAVIGATION LOGIC
+        function showSection(id) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('step-inactive'));
+            document.getElementById(id).classList.remove('step-inactive');
+        }
+
+        // MODULE 1 LOGIC
+        function validateDukcapil() {
+            const nik = document.getElementById('reg-nik').value;
+            if(nik.length < 16) {
+                alert("NIK harus 16 digit!");
+                return;
+            }
+            // Simulate API Call delay
+            document.querySelector('#reg-step-1 button').innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menghubungi Dukcapil...";
+            setTimeout(() => {
+                document.getElementById('reg-step-1').classList.add('step-inactive');
+                document.getElementById('reg-step-2').classList.remove('step-inactive');
+            }, 1500);
+        }
+
+        function completeOnboarding() {
+            alert("Verifikasi Berhasil! Akun Aktif.");
+            document.getElementById('user-info').classList.remove('hidden');
+            showSection('modul-2');
+        }
+
+        // MODULE 3 LOGIC
+        function goToFiling() { showSection('modul-3'); }
+        function nextFiling() {
+            document.getElementById('filing-step-1').classList.add('step-inactive');
+            document.getElementById('filing-step-2').classList.remove('step-inactive');
+        }
+        function submitSPT() {
+            alert("SPT Berhasil Dikirim! BPE (Bukti Penerimaan Elektronik) telah dikirim ke email Anda.");
+            showSection('modul-2');
+        }
+
+        // MODULE 4 LOGIC
+        function goToBilling() { showSection('modul-4'); }
+        function generateBilling() {
+            document.getElementById('billing-result').classList.remove('hidden');
+        }
+
+        function logout() {
+            location.reload();
+        }
+    </script>
 </body>
 </html>
